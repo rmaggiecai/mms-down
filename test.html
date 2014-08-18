@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>MMS Down Emulator</title>
+    <script src="jcubic-jquery-terminal/js/jquery-1.7.1.min.js"></script>
+    <script src="jcubic-jquery-terminal/js/jquery.mousewheel-min.js"></script>
+    <script src="jcubic-jquery-terminal/js/jquery.terminal-min.js"></script>
+    <link href="jcubic-jquery-terminal/css/jquery.terminal.css" rel="stylesheet"/>
+    <script>
+    jQuery(document).ready(function($) {
+        var anim = false;
+        function typed(finish_typing) {
+            return function(term, message, delay, finish) {
+            anim = true;
+            var prompt = term.get_prompt();
+            var c = 0;
+            if (message.length > 0) {
+                term.set_prompt('');
+                var interval = setInterval(function() {
+                    term.insert(message[c++]);
+                    if (c == message.length) {
+                        clearInterval(interval);
+                        // execute in next interval
+                        setTimeout(function() {
+                            // swap command with prompt
+                            finish_typing(term, message, prompt);
+                            anim = false
+                            finish && finish();
+                        }, delay);
+                    }
+                }, delay);
+            }
+        };
+    }
+    var typed_prompt = typed(function(term, message, prompt) {
+        // swap command with prompt
+        term.set_command('');
+        term.set_prompt(message + ' ');
+    });
+    var typed_message = typed(function(term, message, prompt) {
+        term.set_command('');
+        term.echo(message)
+        term.set_prompt(prompt);
+    });
+    $('body').terminal(function(cmd, term) {
+        var finish = false;
+        if (cmd =="status") {
+            term.echo("you'll be redirected shortly...");
+            window.location.replace("http://google.com");
+        } else if (cmd == 'support'){
+            term.echo("\nPlease call support for immediate assistance\n\nAMERICA: 1-646-201-9247\nEUROPE, AFRICA, AND MIDDLE EAST: (0)20 300 49321\nASIA: +61 2 4022 8861\n\nINDIA: 000-800-100-7387\nTOKYO: +813457893597\nBEIJING, CHINA: +86-10-84053445\nSHENZHEN, CHINA: +86-755-86243507\nHONG KONG: 800-906-177\nTAIPEI: +886-2-7745-0460\n\n");
+        } else {
+            term.echo("unknow command " + command);
+        }
+    }, {
+        name: 'xxx',
+        greetings: null,
+        onInit: function(term) {
+            // first question
+            var msgMain = "MongoDB Monitoring Service is down because a fatal exception has occured at 0038:UEW92034 in UXD UMM01 00301R0023. \nWe are working on restoring service.\n\nType 'status' for more updates\nType 'support' if you need immediate assistance\n\n";
+            typed_message(term, msgMain, 50);
+
+            // var msgStatus = "Type "status" for more updates" ;
+            // typed_message(term, msgStatus, 50);
+            // var msgSupport = "If you need immidiate assistance, type "Support"";
+            // typed_message(term, msgSupport, 50);
+        },
+        keydown: function(e) {
+            //disable keyboard when animating
+            if (anim) {
+                return false;
+            }
+        }
+    });
+    });
+    </script>
+  </head>
+<body>
+</body>
